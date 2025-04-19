@@ -21,6 +21,14 @@ description: Please see the README on GitHub at <https://github.com/att-ar/aoc20
 
 dependencies:
     - base >= 4.7 && < 5
+    - wreq
+    - lens
+    - bytestring
+    - containers
+    - split
+    - text
+    - directory
+    - filepath
 
 ghc-options:
     - -Wall
