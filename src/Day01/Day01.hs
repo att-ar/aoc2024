@@ -39,15 +39,15 @@ day01P1 filepath = do
   lists <- parseFile filepath -- [(Int, Int)], need to use <- because it is still in the IO action
   -- sort them both (bimap needed because fmap only applies to the last elem of tuple)
   -- uncurry zip turns zip from List1 -> (List2 -> ZippedList) function to a (List1, List2) -> ZippedList function
-  --    have to do this because `unzip pairs` returns a tuple of lists
+  --    have to do this because lists is a tuple of [Int]
   -- then leftwise fold to sum the distances
   print (foldl' sumDistances 0 (uncurry zip (bimap sort sort lists)))
 
-{- Reducer for day 2 leftKey * leftKeyCount * rightKeyCount -}
+{- Reducer for part 2 leftKey * leftKeyCount * rightKeyCount -}
 sumSimilarity :: (IntMap.IntMap Int, IntMap.IntMap Int) -> Int
 sumSimilarity (leftCounter, rightCounter) = IntMap.foldlWithKey' go 0 leftCounter
   where
-    go :: IntMap.Key -> IntMap.Key -> IntMap.Key -> IntMap.Key
+    go :: Int -> IntMap.Key -> IntMap.Key -> IntMap.Key
     go acc key leftCount =
       let rightCount = fromMaybe 0 (IntMap.lookup key rightCounter)
        in acc + key * leftCount * rightCount
