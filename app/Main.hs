@@ -1,13 +1,9 @@
 module Main (main) where
 
-import Day01.Day01 (day01P1, day01P2)
+import Day01.Day01 (doDay01)
+import Day02.Day02 (doDay02)
 
 main :: IO ()
 main = do
-  print "--- Day 01 ---"
-  print " -- Part 1"
-  day01P1 "src/Day01/day01_small.txt"
-  day01P1 "src/Day01/day01.txt"
-  print " -- Part 2"
-  day01P2 "src/Day01/day01_small.txt"
-  day01P2 "src/Day01/day01.txt"
+  doDay01
+  doDay02

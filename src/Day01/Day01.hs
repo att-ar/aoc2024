@@ -1,4 +1,4 @@
-module Day01.Day01 (day01P1, day01P2) where
+module Day01.Day01 (doDay01) where
 
 import Data.Bifunctor (bimap)
 import qualified Data.ByteString.Char8 as BS
@@ -57,3 +57,16 @@ day01P2 :: FilePath -> IO ()
 day01P2 filepath = do
   lists <- parseFile filepath -- [(Int, Int)]
   print (sumSimilarity (bimap iCounter iCounter lists))
+
+{- Function to run Day 1 -}
+doDay01 :: IO ()
+doDay01 = do
+  print "--- Day 01 ---"
+
+  print " -- Part 1"
+  day01P1 "src/Day01/day01_small.txt"
+  day01P1 "src/Day01/day01.txt"
+
+  print " -- Part 2"
+  day01P2 "src/Day01/day01_small.txt"
+  day01P2 "src/Day01/day01.txt"
