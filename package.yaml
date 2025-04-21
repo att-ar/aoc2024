@@ -29,6 +29,7 @@ dependencies:
     - text
     - directory
     - filepath
+    - regex-tdfa
 
 ghc-options:
     - -Wall

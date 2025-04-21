@@ -27,6 +27,7 @@ library
   exposed-modules:
       Day01.Day01
       Day02.Day02
+      Day03.Day03
       Lib
   other-modules:
       Paths_aoc2024
@@ -42,6 +43,7 @@ library
     , directory
     , filepath
     , lens
+    , regex-tdfa
     , split
     , text
     , wreq
@@ -64,6 +66,7 @@ executable aoc2024-exe
     , directory
     , filepath
     , lens
+    , regex-tdfa
     , split
     , text
     , wreq
@@ -87,6 +90,7 @@ test-suite aoc2024-test
     , directory
     , filepath
     , lens
+    , regex-tdfa
     , split
     , text
     , wreq
