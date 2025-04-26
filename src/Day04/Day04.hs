@@ -28,9 +28,10 @@ makeMatrix rows cols elems = (rows, cols, elems)
 {-
 parse File into my CharMatrix type
 Avoids making an intermediate [Char] and just forms the Vector straight away
+Return the matrix and the vector of positions for the given `letter`
 -}
-parseFileMatrix :: FilePath -> IO (CharMatrix, XPositions)
-parseFileMatrix path = do
+parseFileMatrix :: FilePath -> Char -> IO (CharMatrix, XPositions)
+parseFileMatrix path letter = do
   -- using a boxed vector for the lines
   lns <- V.fromList . BS.lines <$> BS.readFile path
   let rows = V.length lns :: Int
@@ -45,41 +46,43 @@ parseFileMatrix path = do
               let (r, c) = i `divMod` cols -- divMod returns the quotient and remainder
                in BS.index (lns V.! r) c -- index into rth row and cth col
           )
-      -- build a vector with the positions of all 'X's
+      -- build a vector with the positions of all '`letter`'s
       -- can also use VU.unfoldr which skips an intermediate vector
-      xPos =
+      letterPos =
         VU.fromList
           [ (r, c)
             | i <- [0 .. rows * cols - 1],
               let ch = flatVec VU.! i,
-              ch == 'X',
+              ch == letter,
               let (r, c) = i `divMod` cols
           ]
-  return (makeMatrix rows cols flatVec, xPos)
+  return (makeMatrix rows cols flatVec, letterPos)
 
-{- (matrix, (row,col), (rDir, cDir), targetLetter) -> Bool -}
+{- (matrix, (row,col), (drow, dcol), targetLetter) -> Bool -}
 dfsMatrix :: CharMatrix -> Position -> PositionDelta -> Char -> Bool
-dfsMatrix grid (row, col) (rDir, cDir) tgtLetter
+dfsMatrix grid (row, col) (drow, dcol) tgtLetter
   | tgtLetter == 'S' = grid ! (row, col) == tgtLetter
-  | tgtLetter == 'A' = grid ! (row, col) == 'A' && dfsMatrix grid (row + rDir, col + cDir) (rDir, cDir) 'S'
-  | tgtLetter == 'M' = grid ! (row, col) == 'M' && dfsMatrix grid (row + rDir, col + cDir) (rDir, cDir) 'A'
+  | tgtLetter == 'A' = grid ! (row, col) == 'A' && dfsMatrix grid (row + drow, col + dcol) (drow, dcol) 'S'
+  | tgtLetter == 'M' = grid ! (row, col) == 'M' && dfsMatrix grid (row + drow, col + dcol) (drow, dcol) 'A'
   | otherwise = False -- invalid input
 
 day04P1 :: FilePath -> IO ()
 day04P1 filepath = do
-  (matrix, xPos) <- parseFileMatrix filepath
-  let dfs = dfsMatrix matrix -- partial evaluation
-      dfsOnX :: Position -> Int
-      dfsOnX (r, c) =
-        fromEnum (dfs (r + 1, c) (1, 0) 'M') -- down
-          + fromEnum (dfs (r - 1, c) (-1, 0) 'M') -- up
-          + fromEnum (dfs (r, c + 1) (0, 1) 'M') -- right
-          + fromEnum (dfs (r, c - 1) (0, -1) 'M') -- left
-          + fromEnum (dfs (r + 1, c + 1) (1, 1) 'M') -- diag down right
-          + fromEnum (dfs (r + 1, c - 1) (1, -1) 'M') -- diag down left
-          + fromEnum (dfs (r - 1, c + 1) (-1, 1) 'M') -- diag up right
-          + fromEnum (dfs (r - 1, c - 1) (-1, -1) 'M') -- diag up left
+  (matrix, xPos) <- parseFileMatrix filepath 'X'
+  let dfsOnX (r, c) = sum [fromEnum $ dfsMatrix matrix (r + dr, c + dc) (dr, dc) 'M' | dr <- [-1, 0, 1], dc <- [-1, 0, 1]]
   print . VU.sum . VU.map dfsOnX $ xPos
+
+checkPosMAS :: CharMatrix -> Position -> Bool
+checkPosMAS grid (row, col) =
+  or [grid ! (row - d, col - d) == 'M' && grid ! (row + d, col + d) == 'S' | d <- [-1, 1]] -- downslop diag
+    && or [grid ! (row + d, col - d) == 'M' && grid ! (row - d, col + d) == 'S' | d <- [-1, 1]] -- upslope diag
+
+day04P2 :: FilePath -> IO ()
+day04P2 filepath = do
+  -- This time I want the positions of all 'A's
+  (matrix, aPos) <- parseFileMatrix filepath 'A'
+  let checkPosMASWithMatrix = checkPosMAS matrix
+  print . VU.sum . VU.map (fromEnum . checkPosMASWithMatrix) $ aPos
 
 doDay04 :: IO ()
 doDay04 = do
@@ -87,6 +90,8 @@ doDay04 = do
 
   print " -- Part 1"
   day04P1 "src/Day04/day04_small.txt"
+  day04P1 "src/Day04/day04.txt"
 
   print " -- Part 2"
-  day04P1 "src/Day04/day04.txt"
+  day04P2 "src/Day04/day04_small.txt"
+  day04P2 "src/Day04/day04.txt"
