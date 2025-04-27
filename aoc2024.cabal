@@ -29,6 +29,7 @@ library
       Day02.Day02
       Day03.Day03
       Day04.Day04
+      Day05.Day05
       Lib
   other-modules:
       Paths_aoc2024
@@ -38,7 +39,8 @@ library
       src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
-      base >=4.7 && <5
+      array
+    , base >=4.7 && <5
     , bytestring
     , containers
     , directory
@@ -62,6 +64,7 @@ executable aoc2024-exe
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aoc2024
+    , array
     , base >=4.7 && <5
     , bytestring
     , containers
@@ -87,6 +90,7 @@ test-suite aoc2024-test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aoc2024
+    , array
     , base >=4.7 && <5
     , bytestring
     , containers
