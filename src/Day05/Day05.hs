@@ -6,6 +6,7 @@ import qualified Data.Array as A
 import Data.Array.ST (STArray, freeze, newArray, readArray, writeArray)
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.IntSet as IS
+import Data.List (sortBy)
 import Data.Maybe (mapMaybe)
 import Lib (readIntBS)
 
@@ -64,6 +65,28 @@ day05P1 filepathOrder filepathUpdate = do
   let getMiddle lst = lst !! (length lst `div` 2)
   print . sum . map getMiddle . filter (isValidUpdate afterMap) =<< parseUpdates filepathUpdate
 
+day05P2 :: FilePath -> FilePath -> IO ()
+day05P2 filepathOrder filepathUpdate = do
+  -- build the afterMap for nodes
+  afterMap <- makeAfterMap <$> parseEdges filepathOrder
+
+  let getMiddle lst = lst !! (length lst `div` 2)
+
+      -- this would not work if there's a cycle in the graph of the update
+      -- would have to properly topological sort on the trimmed graph of those nodes
+      sortFunc :: Int -> Int -> Ordering
+      sortFunc a b
+        | a `IS.member` (afterMap A.! b) = GT -- a comes after b
+        | b `IS.member` (afterMap A.! a) = LT -- b comes after a
+        | otherwise = EQ
+
+      sortInvalidUpdateProperly :: [Int] -> [Int]
+      sortInvalidUpdateProperly =
+        sortBy sortFunc
+
+  -- get the sum of the middle numbers of the properly sorted versions of the invalid updates
+  print . sum . map (getMiddle . sortInvalidUpdateProperly) . filter (not . isValidUpdate afterMap) =<< parseUpdates filepathUpdate
+
 doDay05 :: IO ()
 doDay05 = do
   print "--- Day 05 ---"
@@ -71,3 +94,7 @@ doDay05 = do
   print " -- Part 1"
   day05P1 "src/Day05/day05_small_order.txt" "src/Day05/day05_small_update.txt"
   day05P1 "src/Day05/day05_order.txt" "src/Day05/day05_update.txt"
+
+  print " -- Part 2"
+  day05P2 "src/Day05/day05_small_order.txt" "src/Day05/day05_small_update.txt"
+  day05P2 "src/Day05/day05_order.txt" "src/Day05/day05_update.txt"
