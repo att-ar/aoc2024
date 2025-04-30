@@ -6,6 +6,7 @@ import Day03.Day03 (doDay03)
 import Day04.Day04 (doDay04)
 import Day05.Day05 (doDay05)
 import Day06.Day06 (doDay06)
+import Day07.Day07 (doDay07)
 
 main :: IO ()
 main = do
@@ -15,3 +16,4 @@ main = do
   doDay04
   doDay05
   doDay06
+  doDay07

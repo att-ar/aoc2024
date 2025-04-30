@@ -5,7 +5,7 @@ import qualified Data.HashSet as HS
 import Data.Maybe (fromJust)
 import qualified Data.Vector as V
 import qualified Data.Vector.Unboxed as VU
-import Lib (byteStringToUnboxedVector, timeIt)
+import Lib (byteStringToUnboxedVector) -- , timeIt)
 
 type Position = (Int, Int)
 
@@ -179,4 +179,5 @@ doDay06 = do
 
   print " -- Part 2 : Faster"
   day06P2Faster "src/Day06/day06_small.txt"
-  timeIt $ day06P2Faster "src/Day06/day06.txt"
+
+-- timeIt $ day06P2Faster "src/Day06/day06.txt"
