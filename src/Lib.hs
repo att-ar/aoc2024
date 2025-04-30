@@ -1,10 +1,12 @@
-module Lib (readIntBS, aCounter, iCounter, textToUnboxedVector, byteStringToUnboxedVector) where
+module Lib (readIntBS, aCounter, iCounter, textToUnboxedVector, byteStringToUnboxedVector, timeIt) where
 
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.IntMap.Lazy as IntMap
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as T
 import qualified Data.Vector.Unboxed as VU
+import System.CPUTime (getCPUTime)
+import Text.Printf (printf)
 
 -- Helper to parse a ByteString into Int safely
 readIntBS :: BS.ByteString -> Maybe Int
@@ -21,3 +23,12 @@ textToUnboxedVector = VU.fromList . T.unpack
 
 byteStringToUnboxedVector :: BS.ByteString -> VU.Vector Char
 byteStringToUnboxedVector = VU.fromList . BS.unpack
+
+timeIt :: IO a -> IO a
+timeIt action = do
+  start <- getCPUTime
+  result <- action
+  end <- getCPUTime
+  let diff = fromIntegral (end - start) / ((10.0 :: Double) ^ (12 :: Int)) :: Double
+  printf "CPU time: %.6f sec\n" diff
+  return result

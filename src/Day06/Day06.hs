@@ -5,7 +5,7 @@ import qualified Data.HashSet as HS
 import Data.Maybe (fromJust)
 import qualified Data.Vector as V
 import qualified Data.Vector.Unboxed as VU
-import Lib (byteStringToUnboxedVector)
+import Lib (byteStringToUnboxedVector, timeIt)
 
 type Position = (Int, Int)
 
@@ -81,8 +81,8 @@ dayO6P1 filepath = do
 Key insight: revisiting a position while travelling in the same dir means you are in loop
 Need to reduce the search space
 -}
-day06P2Faster :: FilePath -> IO ()
-day06P2Faster filepath = do
+day06P2 :: FilePath -> IO ()
+day06P2 filepath = do
   grid <- parseGrid filepath
   let simulateGuard :: PositionSet -> Position -> PositionDelta -> PositionSet
       simulateGuard visited (row, col) (dr, dc) = case grid ! (row, col) of
@@ -97,7 +97,7 @@ day06P2Faster filepath = do
 
       trimmedObstaclePositions =
         filter
-          (\obstacle -> fromJust (grid ! obstacle) /= '#' && HS.member obstacle guardPositions)
+          (\obstacle -> fromJust (grid ! obstacle) /= '#' && HS.member obstacle guardPositions && obstacle /= startPos)
           [(obsR, obsC) | obsR <- [0 .. height grid - 1], obsC <- [0 .. width grid - 1]]
 
       isLoop :: PositionVectorSet -> Position -> Position -> PositionDelta -> Bool
@@ -112,6 +112,59 @@ day06P2Faster filepath = do
 
   print $ length $ filter (\obstacle -> isLoop HS.empty obstacle startPos startDir) trimmedObstaclePositions
 
+{-
+I will try to run the obstacle simulations without restarting from the start pos everytime
+-}
+day06P2Faster :: FilePath -> IO ()
+day06P2Faster filepath = do
+  grid <- parseGrid filepath
+
+  let startPos = fromJust $ findStart $ matrix grid
+      startDir = (-1, 0) :: PositionDelta
+
+      -- (prefixVisited, obstacle, startPos, startDir) -> isLoopBool
+      simulateObstacle :: PositionVectorSet -> Position -> Position -> PositionDelta -> Bool
+      simulateObstacle visitedVec obstacle (row, col) (dr, dc)
+        | HS.member ((row, col), (dr, dc)) visitedVec = True -- loop
+        | otherwise = case grid ! (row, col) of
+            Nothing -> False -- exited grid
+            Just ch ->
+              if ch == '#' || (row, col) == obstacle
+                then simulateObstacle visitedVec obstacle (row - dr, col - dc) (getNewDirection (dr, dc))
+                else simulateObstacle (HS.insert ((row, col), (dr, dc)) visitedVec) obstacle (row + dr, col + dc) (dr, dc)
+
+      isPositionValid :: Position -> Bool
+      isPositionValid pos = maybe False (/= '#') (grid ! pos)
+
+      isObstacleNew :: PositionSet -> Position -> Bool
+      isObstacleNew visited obstacle = not $ HS.member obstacle visited
+
+      {-
+      Will reduce redundant work by placing an obstacle in front of the guard at every iteration that I can
+        i.e. in bound and not already obstacle
+      We know that walking the original path will never loop, so terminate when out of bounds
+      -}
+      simulateAllObstacles :: PositionVectorSet -> PositionSet -> Position -> PositionDelta -> Int
+      simulateAllObstacles visitedVec visited (row, col) (dr, dc) = case grid ! (row, col) of
+        Nothing -> 0 -- finish sim
+        Just '#' -> simulateAllObstacles visitedVec visited (row - dr, col - dc) (getNewDirection (dr, dc)) -- go along proper path
+        _ -> do
+          -- simulate obstacle if appropriate
+          let newVisitedVec = HS.insert ((row, col), (dr, dc)) visitedVec
+              newVisited = HS.insert (row, col) visited
+              newObstacle = (row + dr, col + dc)
+              (ndr, ndc) = getNewDirection (dr, dc)
+
+              simResult =
+                fromEnum $
+                  isPositionValid newObstacle
+                    && isObstacleNew newVisited newObstacle
+                    && simulateObstacle newVisitedVec newObstacle (row, col) (ndr, ndc)
+
+          simResult + simulateAllObstacles newVisitedVec newVisited (row + dr, col + dc) (dr, dc)
+
+  print $ simulateAllObstacles HS.empty HS.empty startPos startDir
+
 doDay06 :: IO ()
 doDay06 = do
   print "--- Day 06 ---"
@@ -121,5 +174,9 @@ doDay06 = do
   dayO6P1 "src/Day06/day06.txt"
 
   print " -- Part 2"
+  day06P2 "src/Day06/day06_small.txt"
+  -- timeIt $ day06P2 "src/Day06/day06.txt"
+
+  print " -- Part 2 : Faster"
   day06P2Faster "src/Day06/day06_small.txt"
-  day06P2Faster "src/Day06/day06.txt"
+  timeIt $ day06P2Faster "src/Day06/day06.txt"
