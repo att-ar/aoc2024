@@ -36,6 +36,7 @@ dependencies:
 
 ghc-options:
     - -Wall
+    - -fno-warn-unused-imports
     - -Wcompat
     - -Widentities
     - -Wincomplete-record-updates
@@ -46,8 +47,6 @@ ghc-options:
     - -Wredundant-constraints
     - -O2
     - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
 
 library:
     source-dirs: src

@@ -2,7 +2,7 @@ module Day01.Day01 (doDay01) where
 
 import Data.Bifunctor (bimap)
 import qualified Data.ByteString.Char8 as BS
-import qualified Data.IntMap.Lazy as IntMap
+import qualified Data.IntMap.Lazy as IM
 import Data.List (foldl', sort)
 import Data.Maybe (fromMaybe, mapMaybe)
 import Lib (iCounter, readIntBS)
@@ -44,12 +44,12 @@ day01P1 filepath = do
   print (foldl' sumDistances 0 (uncurry zip (bimap sort sort lists)))
 
 {- Reducer for part 2 leftKey * leftKeyCount * rightKeyCount -}
-sumSimilarity :: (IntMap.IntMap Int, IntMap.IntMap Int) -> Int
-sumSimilarity (leftCounter, rightCounter) = IntMap.foldlWithKey' go 0 leftCounter
+sumSimilarity :: (IM.IntMap Int, IM.IntMap Int) -> Int
+sumSimilarity (leftCounter, rightCounter) = IM.foldlWithKey' go 0 leftCounter
   where
-    go :: Int -> IntMap.Key -> IntMap.Key -> IntMap.Key
+    go :: Int -> IM.Key -> IM.Key -> IM.Key
     go acc key leftCount =
-      let rightCount = fromMaybe 0 (IntMap.lookup key rightCounter)
+      let rightCount = fromMaybe 0 (IM.lookup key rightCounter)
        in acc + key * leftCount * rightCount
 
 {- Day 1 - Part 2 -}

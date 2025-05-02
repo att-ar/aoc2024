@@ -7,13 +7,15 @@ import Day04.Day04 (doDay04)
 import Day05.Day05 (doDay05)
 import Day06.Day06 (doDay06)
 import Day07.Day07 (doDay07)
+import Day08.Day08 (doDay08)
 
 main :: IO ()
 main = do
-  doDay01
-  doDay02
-  doDay03
-  doDay04
-  doDay05
-  doDay06
-  doDay07
+  -- doDay01
+  -- doDay02
+  -- doDay03
+  -- doDay04
+  -- doDay05
+  -- doDay06
+  -- doDay07
+  doDay08
