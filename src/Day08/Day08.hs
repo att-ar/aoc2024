@@ -4,6 +4,7 @@ import qualified Data.ByteString.Char8 as BS
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import Data.List (foldl')
+import Lib (pairCombinations)
 
 type Position = (Int, Int)
 
@@ -22,12 +23,14 @@ parseFile :: FilePath -> IO Accumulator
 parseFile filepath = do
   lns <- BS.lines <$> BS.readFile filepath
 
-  let foldString :: Accumulator -> Char -> Accumulator
+  let -- internal fold over string
+      foldString :: Accumulator -> Char -> Accumulator
       foldString acc ch
         | ch /= '.' =
             let updatedPositions = HM.insertWith (++) ch [(row acc, col acc)] $ dict acc
              in acc {dict = updatedPositions, col = col acc + 1} -- take
         | otherwise = acc {col = col acc + 1} -- skip
+        -- external fold over list of strings
       foldLines :: Accumulator -> BS.ByteString -> Accumulator
       foldLines acc str =
         let lineAcc = BS.foldl' foldString (acc {col = 0}) str
@@ -38,6 +41,8 @@ parseFile filepath = do
 
 isInbound :: Int -> Int -> Position -> Bool
 isInbound h w (r, c) = r >= 0 && r < h && c >= 0 && c < w
+
+{- Part 1 - Naive pair creation with recursion -}
 
 calculateAntinodesForPair :: ((Int, Int) -> Bool) -> Position -> Position -> [Position]
 calculateAntinodesForPair inbound (r1, c1) (r2, c2) =
@@ -52,13 +57,13 @@ processPositionList _ [] accumulatedAntinodes = accumulatedAntinodes -- Base cas
 processPositionList _ [_] accumulatedAntinodes = accumulatedAntinodes -- Base case 2: Only one element left, no pairs possible
 processPositionList dims@(height, width) (p1 : ps) accumulatedAntinodes =
   let -- Calculate all antinodes formed by pairing p1 with each element in ps
-      calcAntinodesWithP1 :: Position -> [Position]
-      calcAntinodesWithP1 = calculateAntinodesForPair (isInbound height width) p1
+      calcAntinodesWithPos :: Position -> [Position]
+      calcAntinodesWithPos = calculateAntinodesForPair (isInbound height width) p1
 
       newAntinodesFromPos :: PositionSet
       newAntinodesFromPos =
         foldl'
-          (\accSet p2 -> foldl' (flip HS.insert) accSet $ calcAntinodesWithP1 p2)
+          (\accSet p2 -> foldl' (flip HS.insert) accSet $ calcAntinodesWithPos p2)
           HS.empty -- empty set for current p1
           ps
 
@@ -83,6 +88,55 @@ day08P1 filepath = do
 
   print $ HS.size antinodes
 
+{- Part 2 - modified to use pairCombinations from Lib and fewer set operations -}
+
+subtractPositions :: Position -> Position -> (Int, Int)
+subtractPositions (x1, y1) (x2, y2) = (x2 - x1, y2 - y1)
+
+addPositions :: Position -> Position -> (Int, Int)
+addPositions (x1, y1) (x2, y2) = (x1 + x2, y1 + y2)
+
+-- Generate antinodes outwards from p along vector v as long as they are inbound
+walkVector :: (Position -> Bool) -> Position -> (Int, Int) -> [Position]
+walkVector inbound p v
+  | not $ inbound nextAntinode = []
+  | otherwise = nextAntinode : walkVector inbound nextAntinode v
+  where
+    nextAntinode = addPositions p v
+
+getPairwiseAntinodes :: (Position -> Bool) -> Position -> Position -> [Position]
+getPairwiseAntinodes inbound p1 p2 =
+  let (dx, dy) = subtractPositions p1 p2
+   in walkVector inbound p1 (-dx, -dy) ++ walkVector inbound p2 (dx, dy)
+
+-- Processes a list of positions belonging to a single character.
+-- Generates distinct antinodes from all pairs and includes the original positions
+-- if the list has at least two elements.
+getGroupwiseAntinodes :: (Int, Int) -> [Position] -> PositionSet
+getGroupwiseAntinodes (height, width) positions = HS.fromList (antennas ++ allPairwiseAntinodes)
+  where
+    inbound = isInbound height width
+
+    combinePairwiseAntinodes :: (Position, Position) -> [Position] -> [Position]
+    combinePairwiseAntinodes (p1, p2) acc = acc ++ getPairwiseAntinodes inbound p1 p2
+
+    allPairwiseAntinodes :: [Position]
+    allPairwiseAntinodes = foldr combinePairwiseAntinodes [] $ pairCombinations positions
+
+    antennas :: [Position]
+    antennas = case positions of
+      (_ : _ : _) -> positions -- List has 2+ elems
+      _ -> []
+
+day08P2 :: FilePath -> IO ()
+day08P2 filepath = do
+  contents <- parseFile filepath
+  let dims = (row contents, col contents)
+      charPos = dict contents
+      -- (f . g) x = f (g x)
+      antinodes = HM.foldr (HS.union . getGroupwiseAntinodes dims) HS.empty charPos
+  print $ HS.size antinodes
+
 doDay08 :: IO ()
 doDay08 = do
   print "--- Day 08 ---"
@@ -90,3 +144,7 @@ doDay08 = do
   print " -- Part 1"
   day08P1 "src/Day08/day08_small.txt"
   day08P1 "src/Day08/day08.txt"
+
+  print " -- Part 2"
+  day08P2 "src/Day08/day08_small.txt"
+  day08P2 "src/Day08/day08.txt"

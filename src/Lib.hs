@@ -1,7 +1,8 @@
-module Lib (readIntBS, aCounter, iCounter, textToUnboxedVector, byteStringToUnboxedVector, timeIt) where
+module Lib (readIntBS, aCounter, iCounter, textToUnboxedVector, byteStringToUnboxedVector, pairCombinations, timeIt) where
 
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.IntMap.Lazy as IntMap
+import Data.List (tails)
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as T
 import qualified Data.Vector.Unboxed as VU
@@ -23,6 +24,9 @@ textToUnboxedVector = VU.fromList . T.unpack
 
 byteStringToUnboxedVector :: BS.ByteString -> VU.Vector Char
 byteStringToUnboxedVector = VU.fromList . BS.unpack
+
+pairCombinations :: [a] -> [(a, a)]
+pairCombinations xs = [(x, y) | (x : rest) <- tails xs, y <- rest]
 
 timeIt :: IO a -> IO a
 timeIt action = do
