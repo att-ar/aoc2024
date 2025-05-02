@@ -11,7 +11,7 @@ type Position = (Int, Int)
 
 type PositionDelta = (Int, Int)
 
-type XPositions = VU.Vector Position
+type XPositions = V.Vector Position
 
 makeMatrix :: Int -> Int -> VU.Vector Char -> CharMatrix
 makeMatrix rows cols elems = (rows, cols, elems)
@@ -49,7 +49,7 @@ parseFileMatrix path letter = do
       -- build a vector with the positions of all '`letter`'s
       -- can also use VU.unfoldr which skips an intermediate vector
       letterPos =
-        VU.fromList
+        V.fromList
           [ (r, c)
             | i <- [0 .. rows * cols - 1],
               let ch = flatVec VU.! i,
@@ -70,7 +70,7 @@ day04P1 :: FilePath -> IO ()
 day04P1 filepath = do
   (matrix, xPos) <- parseFileMatrix filepath 'X'
   let dfsOnX (r, c) = sum [fromEnum $ dfsMatrix matrix (r + dr, c + dc) (dr, dc) 'M' | dr <- [-1, 0, 1], dc <- [-1, 0, 1]]
-  print . VU.sum . VU.map dfsOnX $ xPos
+  print . V.sum . V.map dfsOnX $ xPos
 
 checkPosMAS :: CharMatrix -> Position -> Bool
 checkPosMAS grid (row, col) =
@@ -82,7 +82,7 @@ day04P2 filepath = do
   -- This time I want the positions of all 'A's
   (matrix, aPos) <- parseFileMatrix filepath 'A'
   let checkPosMASWithMatrix = checkPosMAS matrix
-  print . VU.sum . VU.map (fromEnum . checkPosMASWithMatrix) $ aPos
+  print . V.sum . V.map (fromEnum . checkPosMASWithMatrix) $ aPos
 
 doDay04 :: IO ()
 doDay04 = do
