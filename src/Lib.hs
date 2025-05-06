@@ -1,4 +1,4 @@
-module Lib (readIntBS, aCounter, iCounter, textToUnboxedVector, byteStringToUnboxedVector, pairCombinations, timeIt) where
+module Lib (readIntBS, aCounter, iCounter, textToUnboxedVector, byteStringToUnboxedVector, pairCombinations, overwriteSublist, timeIt) where
 
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.IntMap.Lazy as IntMap
@@ -27,6 +27,12 @@ byteStringToUnboxedVector = VU.fromList . BS.unpack
 
 pairCombinations :: [a] -> [(a, a)]
 pairCombinations xs = [(x, y) | (x : rest) <- tails xs, y <- rest]
+
+overwriteSublist :: Int -> Int -> [a] -> [a] -> [a]
+overwriteSublist start end new xs =
+  let (prefix, rest) = splitAt start xs
+      (_, suffix) = splitAt (end - start) rest
+   in prefix ++ new ++ suffix
 
 timeIt :: IO a -> IO a
 timeIt action = do
