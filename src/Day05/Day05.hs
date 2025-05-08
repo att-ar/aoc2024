@@ -4,11 +4,11 @@ import Control.Monad (forM_)
 import Control.Monad.ST (ST, runST)
 import qualified Data.Array as A
 import Data.Array.ST (STArray, freeze, newArray, readArray, writeArray)
-import qualified Data.ByteString.Char8 as BS
+import qualified Data.ByteString.Char8 as BS8
 import qualified Data.IntSet as IS
 import Data.List (sortBy)
 import Data.Maybe (mapMaybe)
-import Lib (readIntBS)
+import Lib (readIntBS8)
 
 -- Array of Integer Sets (instead of a map of integer sets)
 -- each value set holds the integers that need to appear after the key int
@@ -16,19 +16,19 @@ type AfterSet = A.Array Int IS.IntSet
 
 type Edge = (Int, Int)
 
-parseEdge :: BS.ByteString -> Maybe Edge
-parseEdge edgeStr = case BS.split '|' edgeStr of
+parseEdge :: BS8.ByteString -> Maybe Edge
+parseEdge edgeStr = case BS8.split '|' edgeStr of
   [a, b] -> do
-    before <- readIntBS a
-    after <- readIntBS b
+    before <- readIntBS8 a
+    after <- readIntBS8 b
     return (before, after)
   _ -> Nothing
 
 parseEdges :: FilePath -> IO [Edge]
-parseEdges filepath = mapMaybe parseEdge . BS.lines <$> BS.readFile filepath
+parseEdges filepath = mapMaybe parseEdge . BS8.lines <$> BS8.readFile filepath
 
 parseUpdates :: FilePath -> IO [[Int]]
-parseUpdates filepath = map (mapMaybe readIntBS . BS.split ',') . BS.lines <$> BS.readFile filepath
+parseUpdates filepath = map (mapMaybe readIntBS8 . BS8.split ',') . BS8.lines <$> BS8.readFile filepath
 
 {- N in [10, 99] -}
 makeAfterMap :: [Edge] -> AfterSet

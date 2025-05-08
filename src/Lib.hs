@@ -1,6 +1,6 @@
-module Lib (readIntBS, aCounter, iCounter, textToUnboxedVector, byteStringToUnboxedVector, pairCombinations, overwriteSublist, timeIt) where
+module Lib (readIntBS8, aCounter, iCounter, textToUnboxedVector, byteStringToUnboxedVector, pairCombinations, overwriteSublist, timeIt) where
 
-import qualified Data.ByteString.Char8 as BS
+import qualified Data.ByteString.Char8 as BS8
 import qualified Data.IntMap.Lazy as IntMap
 import Data.List (tails)
 import qualified Data.Map.Strict as Map
@@ -10,8 +10,8 @@ import System.CPUTime (getCPUTime)
 import Text.Printf (printf)
 
 -- Helper to parse a ByteString into Int safely
-readIntBS :: BS.ByteString -> Maybe Int
-readIntBS bs = fmap fst (BS.readInt bs)
+readIntBS8 :: BS8.ByteString -> Maybe Int
+readIntBS8 bs = fmap fst (BS8.readInt bs)
 
 aCounter :: (Ord a) => [a] -> Map.Map a Int
 aCounter xs = Map.fromListWith (+) [(x, 1) | x <- xs]
@@ -22,8 +22,8 @@ iCounter xs = IntMap.fromListWith (+) [(x, 1) | x <- xs]
 textToUnboxedVector :: T.Text -> VU.Vector Char
 textToUnboxedVector = VU.fromList . T.unpack
 
-byteStringToUnboxedVector :: BS.ByteString -> VU.Vector Char
-byteStringToUnboxedVector = VU.fromList . BS.unpack
+byteStringToUnboxedVector :: BS8.ByteString -> VU.Vector Char
+byteStringToUnboxedVector = VU.fromList . BS8.unpack
 
 pairCombinations :: [a] -> [(a, a)]
 pairCombinations xs = [(x, y) | (x : rest) <- tails xs, y <- rest]

@@ -1,13 +1,13 @@
 module Day09.Day09 (doDay09) where
 
-import qualified Data.ByteString.Char8 as BS
+import qualified Data.ByteString.Char8 as BS8
 import Data.Maybe (mapMaybe)
-import Lib (readIntBS)
+import Lib (readIntBS8)
 
 type IdxElem = (Int, Maybe Int)
 
 parseLine :: FilePath -> IO [Int]
-parseLine filepath = mapMaybe (readIntBS . BS.singleton) . BS.unpack <$> BS.readFile filepath
+parseLine filepath = mapMaybe (readIntBS8 . BS8.singleton) . BS8.unpack <$> BS8.readFile filepath
 
 {- Part 1 : Super clean logic delegation -}
 

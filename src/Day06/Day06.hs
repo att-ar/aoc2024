@@ -1,6 +1,6 @@
 module Day06.Day06 (doDay06) where
 
-import qualified Data.ByteString.Char8 as BS
+import qualified Data.ByteString.Char8 as BS8
 import qualified Data.HashSet as HS
 import Data.Maybe (fromJust)
 import qualified Data.Vector as V
@@ -34,7 +34,7 @@ data CharMatrix = CharMatrix
 -- the outer vector needs to be boxed because type metadata is needed since the elements aren't a primitive
 parseGrid :: FilePath -> IO CharMatrix
 parseGrid filepath = do
-  m <- V.fromList . map byteStringToUnboxedVector . BS.lines <$> BS.readFile filepath
+  m <- V.fromList . map byteStringToUnboxedVector . BS8.lines <$> BS8.readFile filepath
   let h = V.length m
       w = VU.length $ V.head m
   return CharMatrix {height = h, width = w, matrix = m}

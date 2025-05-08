@@ -1,9 +1,9 @@
 module Day03.Day03 (doDay03) where
 
-import qualified Data.ByteString.Char8 as BS
+import qualified Data.ByteString.Char8 as BS8
 import Data.List (foldl')
 import Data.Maybe (mapMaybe)
-import Lib (readIntBS)
+import Lib (readIntBS8)
 import Text.Regex.TDFA (AllTextMatches, getAllTextMatches, (=~))
 import Text.Regex.TDFA.ByteString ()
 
@@ -11,25 +11,25 @@ import Text.Regex.TDFA.ByteString ()
 Parse and compute a "mul(X,Y)" operation
 usage of =~ : `my_string =~ my regex`
 -}
-parseComputeMul :: BS.ByteString -> Int
-parseComputeMul op = product (mapMaybe readIntBS (getAllTextMatches (op =~ regex :: AllTextMatches [] BS.ByteString)))
+parseComputeMul :: BS8.ByteString -> Int
+parseComputeMul op = product (mapMaybe readIntBS8 (getAllTextMatches (op =~ regex :: AllTextMatches [] BS8.ByteString)))
   where
     -- captures the two 1-3 digit integers to the left and right of the comma
     regex = "[[:digit:]]{1,3}"
 
 {- Parse a line and return a list of mul(X,Y) -}
-parseLine :: BS.ByteString -> [BS.ByteString]
-parseLine line = getAllTextMatches (line =~ regex :: AllTextMatches [] BS.ByteString)
+parseLine :: BS8.ByteString -> [BS8.ByteString]
+parseLine line = getAllTextMatches (line =~ regex :: AllTextMatches [] BS8.ByteString)
   where
     regex = "mul\\([[:digit:]]{1,3},[[:digit:]]{1,3}\\)"
 
-{- concatMap concats the results of a map, I need this to prevent getting nested [ [BS.ByteString] ] -}
+{- concatMap concats the results of a map, I need this to prevent getting nested [ [BS8.ByteString] ] -}
 day03P1 :: FilePath -> IO ()
-day03P1 filepath = print . sum . map parseComputeMul . concatMap parseLine . BS.lines =<< BS.readFile filepath
+day03P1 filepath = print . sum . map parseComputeMul . concatMap parseLine . BS8.lines =<< BS8.readFile filepath
 
 {- Parse a line and return a list of mul(X,Y) -}
-parseLineConditionals :: BS.ByteString -> [BS.ByteString]
-parseLineConditionals line = getAllTextMatches (line =~ regex :: AllTextMatches [] BS.ByteString)
+parseLineConditionals :: BS8.ByteString -> [BS8.ByteString]
+parseLineConditionals line = getAllTextMatches (line =~ regex :: AllTextMatches [] BS8.ByteString)
   where
     mulPat = "mul\\([[:digit:]]{1,3},[[:digit:]]{1,3}\\)"
     dontPat = "don't\\(\\)"
@@ -37,16 +37,16 @@ parseLineConditionals line = getAllTextMatches (line =~ regex :: AllTextMatches 
     -- Concat with OR
     regex = mulPat ++ "|" ++ dontPat ++ "|" ++ doPat
 
-{- concatMap concats the results of a map, I need this to prevent getting nested [ [BS.ByteString] ] -}
+{- concatMap concats the results of a map, I need this to prevent getting nested [ [BS8.ByteString] ] -}
 day03P2 :: FilePath -> IO ()
 day03P2 filepath = do
-  contents <- BS.readFile filepath
-  let parsedLines = concatMap parseLineConditionals (BS.lines contents)
+  contents <- BS8.readFile filepath
+  let parsedLines = concatMap parseLineConditionals (BS8.lines contents)
 
-      dont_ = BS.pack "don't()"
-      do_ = BS.pack "do()"
+      dont_ = BS8.pack "don't()"
+      do_ = BS8.pack "do()"
 
-      reduce :: (Bool, Int) -> BS.ByteString -> (Bool, Int)
+      reduce :: (Bool, Int) -> BS8.ByteString -> (Bool, Int)
       reduce (state, acc) str
         | str == dont_ = (False, acc) -- instruction parse change state
         | str == do_ = (True, acc) -- instruction parse change state

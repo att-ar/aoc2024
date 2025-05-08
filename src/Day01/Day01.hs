@@ -1,11 +1,11 @@
 module Day01.Day01 (doDay01) where
 
 import Data.Bifunctor (bimap)
-import qualified Data.ByteString.Char8 as BS
+import qualified Data.ByteString.Char8 as BS8
 import qualified Data.IntMap.Lazy as IM
 import Data.List (foldl', sort)
 import Data.Maybe (fromMaybe, mapMaybe)
-import Lib (iCounter, readIntBS)
+import Lib (iCounter, readIntBS8)
 
 {-
 Read the lines into list of tuples [(Int, Int)]
@@ -14,19 +14,19 @@ Then unzip the list of tuples into a tuple of lists (all left with left, all rig
 equivalent to:
 
 parseFile filepath = do
-  contents <- BS.readFile filepath
-  let (lefts, rights) = unzip (mapMaybe parseLine (BS.lines contents))
+  contents <- BS8.readFile filepath
+  let (lefts, rights) = unzip (mapMaybe parseLine (BS8.lines contents))
   return (lefts, rights)
 -}
 parseFile :: FilePath -> IO ([Int], [Int])
-parseFile filepath = fmap (unzip . mapMaybe parseLine . BS.lines) (BS.readFile filepath)
+parseFile filepath = fmap (unzip . mapMaybe parseLine . BS8.lines) (BS8.readFile filepath)
 
 -- Parses a line into a (Int, Int) tuple if it has exactly two valid ints
-parseLine :: BS.ByteString -> Maybe (Int, Int)
-parseLine line = case BS.words line of -- switch cases the output of BS.words applied to `line` arg
+parseLine :: BS8.ByteString -> Maybe (Int, Int)
+parseLine line = case BS8.words line of -- switch cases the output of BS8.words applied to `line` arg
   [a, b] -> do
-    x <- readIntBS a
-    y <- readIntBS b
+    x <- readIntBS8 a
+    y <- readIntBS8 b
     return (x, y)
   _ -> Nothing
 

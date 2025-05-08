@@ -1,6 +1,6 @@
 module Day08.Day08 (doDay08) where
 
-import qualified Data.ByteString.Char8 as BS
+import qualified Data.ByteString.Char8 as BS8
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import Data.List (foldl')
@@ -21,7 +21,7 @@ data Accumulator = Accumulator
 
 parseFile :: FilePath -> IO Accumulator
 parseFile filepath = do
-  lns <- BS.lines <$> BS.readFile filepath
+  lns <- BS8.lines <$> BS8.readFile filepath
 
   let -- internal fold over string
       foldString :: Accumulator -> Char -> Accumulator
@@ -31,9 +31,9 @@ parseFile filepath = do
              in acc {dict = updatedPositions, col = col acc + 1} -- take
         | otherwise = acc {col = col acc + 1} -- skip
         -- external fold over list of strings
-      foldLines :: Accumulator -> BS.ByteString -> Accumulator
+      foldLines :: Accumulator -> BS8.ByteString -> Accumulator
       foldLines acc str =
-        let lineAcc = BS.foldl' foldString (acc {col = 0}) str
+        let lineAcc = BS8.foldl' foldString (acc {col = 0}) str
          in -- getting height and width for free
             Accumulator {dict = dict lineAcc, row = row acc + 1, col = col lineAcc}
 

@@ -1,22 +1,22 @@
 module Day07.Day07 (doDay07) where
 
-import qualified Data.ByteString.Char8 as BS
+import qualified Data.ByteString.Char8 as BS8
 import Data.Maybe (mapMaybe)
-import Lib (readIntBS)
+import Lib (readIntBS8)
 
 type Equation = (Int, [Int])
 
-parseEquation :: BS.ByteString -> Maybe Equation
-parseEquation str = case BS.split ':' str of
+parseEquation :: BS8.ByteString -> Maybe Equation
+parseEquation str = case BS8.split ':' str of
   [sRes, sVals] -> do
     -- 1 split only
-    res <- readIntBS sRes
-    vals <- Just $ mapMaybe readIntBS (BS.words sVals)
+    res <- readIntBS8 sRes
+    vals <- Just $ mapMaybe readIntBS8 (BS8.words sVals)
     return (res, vals)
   _ -> Nothing
 
 parseFile :: FilePath -> IO [Equation]
-parseFile filepath = mapMaybe parseEquation . BS.lines <$> BS.readFile filepath
+parseFile filepath = mapMaybe parseEquation . BS8.lines <$> BS8.readFile filepath
 
 backtrack :: Int -> [Int] -> Int -> Bool
 backtrack tgt [] cur = tgt == cur

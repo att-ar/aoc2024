@@ -1,6 +1,6 @@
 module Day04.Day04 (doDay04) where
 
-import qualified Data.ByteString.Char8 as BS
+import qualified Data.ByteString.Char8 as BS8
 import qualified Data.Vector as V
 import qualified Data.Vector.Unboxed as VU
 
@@ -33,9 +33,9 @@ Return the matrix and the vector of positions for the given `letter`
 parseFileMatrix :: FilePath -> Char -> IO (CharMatrix, XPositions)
 parseFileMatrix path letter = do
   -- using a boxed vector for the lines
-  lns <- V.fromList . BS.lines <$> BS.readFile path
+  lns <- V.fromList . BS8.lines <$> BS8.readFile path
   let rows = V.length lns :: Int
-      cols = BS.length (lns V.! 1) :: Int
+      cols = BS8.length (lns V.! 1) :: Int
 
       -- unboxed vectors for the int vectors
       -- build flat vector repr of the matrix input
@@ -44,7 +44,7 @@ parseFileMatrix path letter = do
           (rows * cols) -- equivalent to the `end` of `range` so it's upper bound
           ( \i ->
               let (r, c) = i `divMod` cols -- divMod returns the quotient and remainder
-               in BS.index (lns V.! r) c -- index into rth row and cth col
+               in BS8.index (lns V.! r) c -- index into rth row and cth col
           )
       -- build a vector with the positions of all '`letter`'s
       -- can also use VU.unfoldr which skips an intermediate vector
