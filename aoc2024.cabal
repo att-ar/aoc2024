@@ -35,6 +35,7 @@ library
       Day08.Day08
       Day09.Day09
       Day10.Day10
+      Day11.Day11
       Lib
   other-modules:
       Paths_aoc2024
@@ -51,6 +52,7 @@ library
     , directory
     , filepath
     , lens
+    , mtl
     , regex-tdfa
     , split
     , text
@@ -77,6 +79,7 @@ executable aoc2024-exe
     , directory
     , filepath
     , lens
+    , mtl
     , regex-tdfa
     , split
     , text
@@ -104,6 +107,7 @@ test-suite aoc2024-test
     , directory
     , filepath
     , lens
+    , mtl
     , regex-tdfa
     , split
     , text
