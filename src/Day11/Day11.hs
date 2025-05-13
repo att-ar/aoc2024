@@ -6,12 +6,16 @@ import qualified Data.HashMap.Strict as HM
 import Data.Maybe (mapMaybe)
 import Lib (readIntBS8)
 
-{- Don't need to use Integer since these results don't exceed 2^63 -}
+{-
+Don't need to use Integer since these results don't exceed 2^63.
+Also this solution isn't pure functional since I am using the State Monad
+  instead of passing the updated cache around.
+-}
 
 -- (depth, currentValue) : resultCount
 type Memo = HM.HashMap (Int, Int) Int
 
-{- I'm thinking I just do a DFS on each number with 25 recursive layers -}
+{- Too many duplicate subtrees to do a naive DFS -}
 parseFile :: FilePath -> IO [Int]
 parseFile filepath = mapMaybe readIntBS8 . BS8.words <$> BS8.readFile filepath
 
@@ -23,26 +27,24 @@ digitCount n = go n 0
     go 0 c = c
     go m c = go (m `quot` 10) (c + 1)
 
-evenDigits :: Int -> Bool
-evenDigits = even . digitCount
-
-halve :: Int -> (Int, Int)
-halve x =
-  let d = digitCount x
-      h = d `div` 2
-      pow = 10 ^ (d - h)
+halve :: Int -> Int -> (Int, Int)
+halve x numDigit =
+  let h = numDigit `div` 2
+      pow = 10 ^ (numDigit - h)
    in -- ex) x = 1001 -> pow = 2 -> 1001 // 10^2 = 10, 1001 % 100 = 1
       (x `quot` pow, x `mod` pow)
 
 applyRules :: Int -> Int -> Int -> State Memo Int
 applyRules maxDepth depth val
   | val == 0 = memoDFS maxDepth (depth + 1) 1 -- stone 0 -> stone 1
-  | evenDigits val = do
-      let (left, right) = halve val -- stone with even digits is split
+  | even numDigit = do
+      let (left, right) = halve val numDigit -- stone with even digits is split
       countL <- memoDFS maxDepth (depth + 1) left
       countR <- memoDFS maxDepth (depth + 1) right
       return (countL + countR)
   | otherwise = memoDFS maxDepth (depth + 1) (val * 2024) -- multiply by 2024
+  where
+    numDigit = digitCount val
 
 {-
 when starting at 'depth' and going up to 'maxDepth'.
